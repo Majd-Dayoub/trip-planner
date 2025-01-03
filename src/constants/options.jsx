@@ -27,8 +27,7 @@ export const SelectTravelsList = [
   {
     id: 3,
     title: "Family",
-    description:
-      "Designed for family style vacations.",
+    description: "Designed for family style vacations.",
     icon: <FontAwesomeIcon icon={faPeopleGroup} />, // FontAwesome icon for a group of people
     people: "3 to 5 people",
   },
@@ -52,6 +51,9 @@ export const SelectBudgetOptions = [
     id: 3,
     title: "Expensive",
     description: "Luxurious trips for those seeking premium experiences.",
-    icon: <FontAwesomeIcon icon={faGem}/>, // FontAwesome icon for a gem
+    icon: <FontAwesomeIcon icon={faGem} />, // FontAwesome icon for a gem
   },
 ];
+
+export const AI_PROMPT =
+  "Generate Travel Plan for Location: {location}, for {duration} days for {travelList} with a {budget} budget, Give me a Hotels options list with HotelName, Hotel address, Price, hotel image url, geo coordinates, rating, descriptions and suggest itinerary with placeName, Place Details, Place Image Url, Geo Coordinates, ticket Pricing, Time t travel each of the location for 3 days with each day plan with best time to visit in JSON format.";

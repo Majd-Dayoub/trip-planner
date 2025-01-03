@@ -1,7 +1,8 @@
-import { SelectBudgetOptions, SelectTravelsList } from "@/constants/options";
+import { AI_PROMPT, SelectBudgetOptions, SelectTravelsList } from "@/constants/options";
 import React, { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
-import {Button} from '../../components/ui/button'
+import { Button } from "../../components/ui/button";
+import { chatSession } from "@/service/AiModel";
 
 function CreateTrip() {
   const [place, setPlace] = useState();
@@ -11,13 +12,21 @@ function CreateTrip() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const OnGenerateTrip = () => {
-    if(formData?.duration > 7) {
-      alert('Duration should 7 days or less');
-      return ;
+  const OnGenerateTrip =async() => {
+    if (!formData?.location||!formData?.duration||!formData?.budget||!formData?.travelList) {
+      alert("Please Fill all the fields");
+      return;
     }
-  }
 
+    const FINAL_PROMPT = AI_PROMPT
+    .replace("{location}", formData?.location?.label)
+    .replace("{duration}", formData?.duration)
+    .replace("{budget}", formData?.budget)
+    .replace("{travelList}", formData?.travelList);
+
+    const result = await chatSession.sendMessage(FINAL_PROMPT);
+    console.log(result?.response?.text());
+  };
 
   useEffect(() => {
     console.log(formData);
@@ -36,22 +45,24 @@ function CreateTrip() {
 
       {/* Form */}
       <div className="mt-20 flex flex-col gap-10">
-
         {/* Destination Input */}
         <div>
           <h2 className="text-xl my-3 font-medium">
             What is your destination?
           </h2>
-          <GooglePlacesAutocomplete
-            apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
-            selectProps={{
-              place,
-              onChange: (value) => {
-                setPlace(value);
-                handleInputChange("location", value);
-              },
-            }}
-          />
+          <div>
+            <GooglePlacesAutocomplete
+              className="cursor-text"
+              apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
+              selectProps={{
+                place,
+                onChange: (value) => {
+                  setPlace(value);
+                  handleInputChange("location", value);
+                },
+              }}
+            />
+          </div>
         </div>
 
         {/* Duration of Trip Input */}
@@ -59,12 +70,20 @@ function CreateTrip() {
           <h2 className="text-xl my-3 font-medium">
             How many days is your trip?
           </h2>
-          <input
-            placeholder="Ex.3"
+          <select
             onChange={(e) => handleInputChange("duration", e.target.value)}
-            type="number"
             className="w-full border border-gray-300 rounded-md p-2"
-          />
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Select number of days
+            </option>
+            {[...Array(7)].map((_, index) => (
+              <option key={index + 1} value={index + 1}>
+                {index + 1} {index + 1 === 1 ? "day" : "days"}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Budget Input */}
@@ -75,7 +94,7 @@ function CreateTrip() {
               <div
                 key={index}
                 className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg ${
-                  formData?.budget == item.title&&'shadow-lg border-blue-500'
+                  formData?.budget == item.title && "shadow-lg border-blue-500"
                 }`}
                 onClick={() => handleInputChange("budget", item.title)}
               >
@@ -97,7 +116,8 @@ function CreateTrip() {
               <div
                 key={index}
                 className={`p-4 border cursor-pointer rounded-lg hover:shadow-lg ${
-                  formData?.travelList == item.people&&'shadow-lg border-blue-500'
+                  formData?.travelList == item.people &&
+                  "shadow-lg border-blue-500"
                 }`}
                 onClick={() => handleInputChange("travelList", item.people)}
               >
@@ -108,16 +128,12 @@ function CreateTrip() {
             ))}
           </div>
         </div>
-        
+
         {/* Submit Button */}
         <div className="my-10 justify-end flex">
-          <Button onClick={OnGenerateTrip}>
-            Create Trip
-          </Button>
+          <Button onClick={OnGenerateTrip}>Create Trip</Button>
         </div>
-
       </div>
-
     </div>
   );
 }
