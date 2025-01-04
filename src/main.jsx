@@ -1,6 +1,7 @@
 import React from 'react'; // Core React library
 import { createRoot } from 'react-dom/client'; // React DOM rendering
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'; // Correct imports from react-router-dom
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Main application component
 import App from './App.jsx';
@@ -45,6 +46,8 @@ const router = createBrowserRouter([
 // Render the app
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_AUTH_CLIENT_ID}>
+      <RouterProvider router={router} />
+    </GoogleOAuthProvider>;
   </React.StrictMode>
 );

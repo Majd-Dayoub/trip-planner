@@ -1,28 +1,93 @@
-import { AI_PROMPT, SelectBudgetOptions, SelectTravelsList } from "@/constants/options";
+import {
+  AI_PROMPT,
+  SelectBudgetOptions,
+  SelectTravelsList,
+} from "@/constants/options";
 import React, { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { Button } from "../../components/ui/button";
 import { chatSession } from "@/service/AiModel";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 
 function CreateTrip() {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
 
   const handleInputChange = (name, value) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const OnGenerateTrip =async() => {
-    if (!formData?.location||!formData?.duration||!formData?.budget||!formData?.travelList) {
+  const login = useGoogleLogin({
+    onSuccess: (codeResp) => GetUserProfile(codeResp),
+    onError: (error) => console.log(error),
+  });
+
+  const GetUserProfile = (tokenInfo) => {
+    console.log("GetUserProfile called with token:", tokenInfo);
+
+    axios
+      .get(
+        `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenInfo?.access_token}`,
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        console.log("User Profile:", response.data); 
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setOpenDialog(false);
+        OnGenerateTrip();
+      })
+      .catch((error) => {
+        console.error(
+          "Error fetching user profile:",
+          error.response || error.message
+        ); 
+      });
+  };
+
+  const OnGenerateTrip = async () => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      setOpenDialog(true);
+      return;
+    }
+
+    if (
+      !formData?.location ||
+      !formData?.duration ||
+      !formData?.budget ||
+      !formData?.travelList
+    ) {
       alert("Please Fill all the fields");
       return;
     }
 
-    const FINAL_PROMPT = AI_PROMPT
-    .replace("{location}", formData?.location?.label)
-    .replace("{duration}", formData?.duration)
-    .replace("{budget}", formData?.budget)
-    .replace("{travelList}", formData?.travelList);
+    const FINAL_PROMPT = AI_PROMPT.replace(
+      "{location}",
+      formData?.location?.label
+    )
+      .replace("{duration}", formData?.duration)
+      .replace("{budget}", formData?.budget)
+      .replace("{travelList}", formData?.travelList);
 
     const result = await chatSession.sendMessage(FINAL_PROMPT);
     console.log(result?.response?.text());
@@ -133,6 +198,33 @@ function CreateTrip() {
         <div className="my-10 justify-end flex">
           <Button onClick={OnGenerateTrip}>Create Trip</Button>
         </div>
+
+        {/* Dialog */}
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sign in with Google</DialogTitle>
+              <DialogDescription>
+                <img
+                  className="w-16 h-auto"
+                  src="plane-logo.svg"
+                  alt="TripBuddy Logo"
+                />
+                <Button
+                  className="mt-4 flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 text-white hover:bg-gray-800"
+                  onClick={login}
+                >
+                  <FontAwesomeIcon
+                    icon={faGoogle}
+                    className="text-lg text-red-500"
+                  />
+                  Sign in with Google
+                </Button>
+                Sign in to TripBuddy.ai with Google authentication securely.
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

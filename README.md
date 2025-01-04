@@ -1,8 +1,24 @@
-# React + Vite
+# TripBuddy.ai
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered Travel Planner web application that generates personalized travel itineraries based on user preferences such as destination, budget, and trip duration. The app leverages React, Firebase, Google Places API, GEMINI AI, and Tailwind CSS to provide an intuitive user experience and intelligent travel suggestions.
 
-Currently, two official plugins are available:
+## Visit The Site
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Feel free to check out the project here: [ADD LINK]
+
+
+## Technology
+Frontend: ReactJS, Tailwind CSS
+Backend: Firebase (Authentication, Realtime Database)
+AI Integration: GEMINI AI
+APIs: Google Places API, OAUTH2, 
+Deployment: [HOSTING PLATFORM]
+
+## Installation
+
+npm run dev
+
+
+# Features to work on before deployment
+- fix sign in to be real google button
+- Make landing page better
