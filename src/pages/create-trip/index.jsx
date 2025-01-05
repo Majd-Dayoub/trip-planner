@@ -22,21 +22,28 @@ import {
 
 import { useGoogleLogin } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/service/firebaseConfig";
+
 
 function CreateTrip() {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Handle Input Change
   const handleInputChange = (name, value) => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Google Login
   const login = useGoogleLogin({
     onSuccess: (codeResp) => GetUserProfile(codeResp),
     onError: (error) => console.log(error),
   });
 
+  // Get User Profile
   const GetUserProfile = (tokenInfo) => {
     console.log("GetUserProfile called with token:", tokenInfo);
 
@@ -51,7 +58,7 @@ function CreateTrip() {
         }
       )
       .then((response) => {
-        console.log("User Profile:", response.data); 
+        console.log("User Profile:", response.data);
         localStorage.setItem("user", JSON.stringify(response.data));
         setOpenDialog(false);
         OnGenerateTrip();
@@ -60,10 +67,11 @@ function CreateTrip() {
         console.error(
           "Error fetching user profile:",
           error.response || error.message
-        ); 
+        );
       });
   };
 
+  // Generate Trip Function
   const OnGenerateTrip = async () => {
     const user = localStorage.getItem("user");
     if (!user) {
@@ -80,7 +88,7 @@ function CreateTrip() {
       alert("Please Fill all the fields");
       return;
     }
-
+    setIsLoading(true);
     const FINAL_PROMPT = AI_PROMPT.replace(
       "{location}",
       formData?.location?.label
@@ -91,6 +99,23 @@ function CreateTrip() {
 
     const result = await chatSession.sendMessage(FINAL_PROMPT);
     console.log(result?.response?.text());
+    setIsLoading(false);
+    SaveAiTrip(result?.response?.text());
+  };
+
+  //DB Functions
+  const SaveAiTrip = async (tripData) => {
+    setIsLoading(true);
+    const docId=Date.now().toString();
+    const user= JSON.parse(localStorage.getItem("user"));
+
+    await setDoc(doc(db, "AiTrips", docId), {
+      userSelection: formData,
+      tripData: JSON.parse(tripData),
+      userEmail: user?.email,
+      id: docId,
+    });
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -196,7 +221,7 @@ function CreateTrip() {
 
         {/* Submit Button */}
         <div className="my-10 justify-end flex">
-          <Button onClick={OnGenerateTrip}>Create Trip</Button>
+          <Button disabled={isLoading} onClick={OnGenerateTrip}>Create Trip</Button>
         </div>
 
         {/* Dialog */}
@@ -213,6 +238,7 @@ function CreateTrip() {
                 <Button
                   className="mt-4 flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 text-white hover:bg-gray-800"
                   onClick={login}
+                  
                 >
                   <FontAwesomeIcon
                     icon={faGoogle}
