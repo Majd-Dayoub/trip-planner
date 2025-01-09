@@ -9,6 +9,8 @@ import App from './App.jsx';
 // Page components
 import CreateTrip from './pages/create-trip/index.jsx';
 
+import ViewTrip from './pages/view-trip/[tripId]/index.jsx';
+
 // Custom components
 import Navbar from './components/custom/Navbar.jsx';
 
@@ -38,6 +40,14 @@ const router = createBrowserRouter([
     element: (
       <Layout>
         <CreateTrip />
+      </Layout>
+    ),
+  },
+  {
+    path: '/view-trip/:tripId',
+    element: (
+      <Layout>
+        <ViewTrip />
       </Layout>
     ),
   },

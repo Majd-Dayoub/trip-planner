@@ -24,6 +24,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/firebaseConfig";
+import { useNavigate } from "react-router";
 
 
 function CreateTrip() {
@@ -31,6 +32,8 @@ function CreateTrip() {
   const [formData, setFormData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useNavigate();
 
   // Handle Input Change
   const handleInputChange = (name, value) => {
@@ -116,6 +119,8 @@ function CreateTrip() {
       id: docId,
     });
     setIsLoading(false);
+
+    router(`/view-trip/${docId}`);
   };
 
   useEffect(() => {
