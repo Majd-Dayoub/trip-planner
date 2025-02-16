@@ -26,7 +26,6 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/firebaseConfig";
 import { useNavigate } from "react-router";
 
-
 function CreateTrip() {
   const [place, setPlace] = useState();
   const [formData, setFormData] = useState([]);
@@ -109,17 +108,25 @@ function CreateTrip() {
   //DB Functions
   const SaveAiTrip = async (tripData) => {
     setIsLoading(true);
-    const docId=Date.now().toString();
-    const user= JSON.parse(localStorage.getItem("user"));
+    const docId = Date.now().toString();
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    await setDoc(doc(db, "AiTrips", docId), {
-      userSelection: formData,
-      tripData: JSON.parse(tripData),
-      userEmail: user?.email,
-      id: docId,
-    });
-    setIsLoading(false);
+    try {
+      const cleanedTripData =
+        typeof tripData === "string" ? JSON.parse(tripData) : tripData;
 
+      await setDoc(doc(db, "AiTrips", docId), {
+        userSelection: formData,
+        tripData: cleanedTripData,
+        userEmail: user?.email,
+        id: docId,
+      });
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error saving document:", error);
+      setIsLoading(false);
+    }
     router(`/view-trip/${docId}`);
   };
 
@@ -226,7 +233,9 @@ function CreateTrip() {
 
         {/* Submit Button */}
         <div className="my-10 justify-end flex">
-          <Button disabled={isLoading} onClick={OnGenerateTrip}>Create Trip</Button>
+          <Button disabled={isLoading} onClick={OnGenerateTrip}>
+            Create Trip
+          </Button>
         </div>
 
         {/* Dialog */}
@@ -243,7 +252,6 @@ function CreateTrip() {
                 <Button
                   className="mt-4 flex items-center gap-2 border border-gray-300 rounded-md px-4 py-2 text-white hover:bg-gray-800"
                   onClick={login}
-                  
                 >
                   <FontAwesomeIcon
                     icon={faGoogle}
