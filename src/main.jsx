@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client'; // React DOM rendering
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'; // Correct imports from react-router-dom
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+
 // Main application component
 import App from './App.jsx';
 
 // Page components
+import MyTrips from './pages/my-trips/index.jsx'
+
 import CreateTrip from './pages/create-trip/index.jsx';
 
 import ViewTrip from './pages/view-trip/[tripId]/index.jsx';
@@ -48,6 +51,14 @@ const router = createBrowserRouter([
     element: (
       <Layout>
         <ViewTrip />
+      </Layout>
+    ),
+  },
+  {
+    path: '/my-trips',
+    element: (
+      <Layout>
+        <MyTrips />
       </Layout>
     ),
   },
